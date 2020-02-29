@@ -31,8 +31,21 @@ const typeDefs = gql`
     movie(id: ID): Movie
   }
 
+  input ActorInput {
+    id: ID
+  }
+
+  input MovieInput {
+    id: ID
+    title: String
+    releaseDate: Date
+    rating: Int
+    status: Status
+    actor: [ActorInput]
+  }
+
   type Mutation {
-    addMovie(title: String, releaseDate: Date, id: ID): [Movie]
+    addMovie(movie: MovieInput): [Movie]
   }
 `;
 
@@ -90,11 +103,11 @@ const resolvers = {
   },
 
   Mutation: {
-    addMovie: (obj, { id, title, releaseDate }, ctx) => {
+    addMovie: (obj, { movie }, ctx) => {
       const newMoviesList = [
         ...movies,
         // new movie data
-        { id, title, releaseDate }
+        movie
       ];
       return newMoviesList;
     }
