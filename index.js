@@ -32,22 +32,39 @@ const typeDefs = gql`
   }
 `;
 
+const actors = [
+  {
+    id: "shankara",
+    name: "Shankara"
+  },
+  {
+    id: "shambho",
+    name: "Shambho"
+  }
+];
+
 const movies = [
   {
     id: "ashldja",
     title: "Kailash",
     releaseDate: new Date("10-10-1983"),
-    rating: 5
+    rating: 5,
+    actor: [
+      {
+        id: "shambho"
+      }
+    ]
   },
   {
     id: "uqodhg",
     title: "Shiva Shambho",
     releaseDate: new Date("10-11-1983"),
     rating: 5,
-    actor: {
-      id: "asdfjkl;",
-      name: "mahadevaya"
-    }
+    actor: [
+      {
+        id: "shankara"
+      }
+    ]
   }
 ];
 
@@ -60,6 +77,14 @@ const resolvers = {
       return movies.find(item => item.id === id);
     }
   },
+
+  Movie: {
+    actor: (obj, arg, ctx) => {
+      const actorIds = obj.actor.map(actor => actor.id);
+      return actors.filter(actor => actorIds.includes(actor.id));
+    }
+  },
+
   Date: new GraphQLScalarType({
     name: "Date",
     description: "it's a date",
