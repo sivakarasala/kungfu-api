@@ -19,7 +19,7 @@ const typeDefs = gql`
 
   type Movie {
     id: ID!
-    title: String
+    title: String!
     releaseDate: Date
     rating: Int
     status: Status
@@ -29,6 +29,10 @@ const typeDefs = gql`
   type Query {
     movies: [Movie]
     movie(id: ID): Movie
+  }
+
+  type Mutation {
+    addMovie(title: String, releaseDate: Date, id: ID): [Movie]
   }
 `;
 
@@ -82,6 +86,17 @@ const resolvers = {
     actor: (obj, arg, ctx) => {
       const actorIds = obj.actor.map(actor => actor.id);
       return actors.filter(actor => actorIds.includes(actor.id));
+    }
+  },
+
+  Mutation: {
+    addMovie: (obj, { id, title, releaseDate }, ctx) => {
+      const newMoviesList = [
+        ...movies,
+        // new movie data
+        { id, title, releaseDate }
+      ];
+      return newMoviesList;
     }
   },
 
