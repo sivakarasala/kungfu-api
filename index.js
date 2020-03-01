@@ -1,8 +1,14 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, PubSub } = require("apollo-server");
 const { GraphQLScalarType } = require("graphql");
 const { Kind } = require("graphql/language");
 
+// gql`` parses your string into an AST
 const typeDefs = gql`
+  fragment Meta on Movie {
+    releaseDate
+    rating
+  }
+
   scalar Date
 
   enum Status {
@@ -47,6 +53,10 @@ const typeDefs = gql`
   type Mutation {
     addMovie(movie: MovieInput): [Movie]
   }
+
+  type Subscription {
+    movieAdded: Movie
+  }
 `;
 
 const actors = [
@@ -85,7 +95,16 @@ const movies = [
   }
 ];
 
+const pubsub = new PubSub();
+const MOVIE_ADDED = "MOVIE_ADDED";
+
 const resolvers = {
+  Subscription: {
+    movieAdded: {
+      subscribe: () => pubsub.asyncIterator([MOVIE_ADDED])
+    }
+  },
+
   Query: {
     movies: () => {
       return movies;
@@ -109,6 +128,7 @@ const resolvers = {
         // new movie data
         movie
       ];
+      pubsub.publish(MOVIE_ADDED, { movieAdded: movie });
       return newMoviesList;
     }
   },
@@ -137,7 +157,10 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   introspection: true,
-  playground: true
+  playground: true,
+  context: ({ req }) => {
+    return { userId: "shiva" };
+  }
 });
 
 server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
